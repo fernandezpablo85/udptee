@@ -36,12 +36,14 @@ func main() {
 }
 
 func maskEmail(txt string) string {
-	matches := emailRegex.FindStringSubmatch(txt)
-	if len(matches) > 0 {
-		email := matches[0]
-		parts := strings.Split(email, "@")
-		masked := strings.Repeat("*", len(parts[0])) + "@" + parts[1]
-		return strings.Replace(txt, email, masked, -1)
+	matches := emailRegex.FindAllStringSubmatch(txt, -1)
+	for _, m := range matches {
+		if len(m) > 0 {
+			email := m[0]
+			parts := strings.Split(email, "@")
+			masked := strings.Repeat("*", len(parts[0])) + "@" + parts[1]
+			txt = strings.Replace(txt, email, masked, -1)
+		}
 	}
 	return txt
 }
