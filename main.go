@@ -1,29 +1,28 @@
 package main
 
 import (
+	"flag"
 	"io"
 	"log"
-	"net"
 	"os"
 )
 
+const (
+	defaultHost = "127.0.0.1"
+	defaultPort = 4321
+)
+
 func main() {
-	// scanner := bufio.NewScanner(os.Stdin)
-	conn, err := net.Dial("udp", "127.0.0.1:1234")
-	if err != nil {
-		panic(err)
-	}
+	host := flag.String("host", defaultHost, "udp host")
+	port := flag.Int("port", defaultPort, "udp port")
+	filterColors := flag.Bool("filter-colors", false, "remove colors from log before writing to udp server")
+	filterEmails := flag.Bool("filter-emails", false, "mask emails with * before writing to udp server")
+	flag.Parse()
+
+	conn := MustUDPConnect(*host, *port)
 	defer conn.Close()
-
-	f, err := os.OpenFile("log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
-	flog := &Filter{delegate: f, filterColors: true, filterEmails: true}
-	fudp := &Filter{delegate: conn, filterColors: true, filterEmails: true}
-	ws := io.MultiWriter(os.Stdout, flog, fudp)
+	fudp := &Filter{delegate: conn, filterColors: *filterColors, filterEmails: *filterEmails}
+	ws := io.MultiWriter(os.Stdout, fudp)
 
 	if _, err := io.Copy(ws, os.Stdin); err != nil {
 		log.Fatalf("error while copying %v", err)
