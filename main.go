@@ -12,6 +12,10 @@ const (
 	defaultPort = 4321
 )
 
+var (
+	logger = log.New(os.Stderr, "", log.LstdFlags)
+)
+
 func main() {
 	host := flag.String("host", defaultHost, "udp host")
 	port := flag.Int("port", defaultPort, "udp port")
@@ -24,7 +28,9 @@ func main() {
 	fudp := &Filter{delegate: conn, filterColors: *filterColors, filterEmails: *filterEmails}
 	ws := io.MultiWriter(os.Stdout, fudp)
 
-	if _, err := io.Copy(ws, os.Stdin); err != nil {
-		log.Fatalf("error while copying %v", err)
+	for {
+		if _, err := io.Copy(ws, os.Stdin); err != nil {
+			logger.Printf("error while copying %v", err)
+		}
 	}
 }
