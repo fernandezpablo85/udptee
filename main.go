@@ -29,8 +29,12 @@ func main() {
 	ws := io.MultiWriter(os.Stdout, fudp)
 
 	for {
-		if _, err := io.Copy(ws, os.Stdin); err != nil {
+		n, err := io.Copy(ws, os.Stdin)
+		if err != nil {
 			logger.Printf("error while copying %v", err)
+		}
+		if n == 0 {
+			break
 		}
 	}
 }
