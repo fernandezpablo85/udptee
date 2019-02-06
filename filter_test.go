@@ -37,6 +37,16 @@ func TestFilterEmail(t *testing.T) {
 	}
 }
 
+func TestFilterEmailRepeated(t *testing.T) {
+	w := Filter{filterEmails: true}
+	original := "my email is pablo@mail.com and i also have pablo@mail.com again"
+	filtered := w.filter(original)
+	expected := "my email is *****@mail.com and i also have *****@mail.com again"
+	if expected != filtered {
+		t.Errorf("expected '%s' but was '%s'", expected, filtered)
+	}
+}
+
 func TestFilterBoth(t *testing.T) {
 	w := Filter{filterEmails: true, filterColors: true}
 	original := "my email is pablo@mail.com my favourite color is \x1b[34mblue\x1b[0m"
