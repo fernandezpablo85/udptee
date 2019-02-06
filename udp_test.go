@@ -27,7 +27,7 @@ func TestUDPConnectNegativePort(t *testing.T) {
 
 func TestUDPConnectHighPort(t *testing.T) {
 	_, err := udpConnect("localhost", 2<<15)
-	if err != nil {
+	if err == nil {
 		t.Errorf("expected error but got none %v", err)
 	}
 }
