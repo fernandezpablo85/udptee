@@ -29,13 +29,28 @@ func main() {
 	fudp := &Filter{delegate: conn, filterColors: *filterColors, filterEmails: *filterEmails}
 	ws := io.MultiWriter(os.Stdout, fudp)
 
+	// 32k buffer
+	size := 32 * 1024
+	buf := make([]byte, size)
+
 	for {
-		n, err := io.Copy(ws, os.Stdin)
-		if err != nil {
-			logger.Printf("error while copying %v", err)
+		nr, err := os.Stdin.Read(buf)
+
+		if nr > 0 {
+			_, err := ws.Write(buf[0:nr])
+			if err != nil {
+				logger.Printf("error while writing: %v", err)
+			}
 		}
-		if n == 0 {
-			break
+
+		if err != nil {
+			// EOF means the piped program exited and closed its stdout
+			if err == io.EOF {
+				break
+			} else {
+				logger.Printf("error while reading: %v", err)
+				os.Exit(1)
+			}
 		}
 	}
 }
